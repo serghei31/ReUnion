@@ -66,10 +66,6 @@ var userSchema = new mongoose.Schema({
       minlength: 1,
       maxlength: 5,
    },
-   createdAt: {
-      type: Date,
-      default: new Date(),
-   },
    active: {
       type: Boolean,
       default: true,
@@ -79,6 +75,7 @@ var userSchema = new mongoose.Schema({
 });
 
 userSchema.pre('save', async function () {
+   //Only run this function if password was actually modified
    if (!this.isModified(password)) return next();
 
    this.password = await bcrypt.hash(this.password, 12);
