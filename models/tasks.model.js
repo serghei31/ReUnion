@@ -8,7 +8,6 @@ const taskSchema = new mongoose.Schema({
    },
    createdAt: {
       type: Date,
-      required: [true, 'A task must have a created date'],
       default: Date.now,
    },
    Status: {
