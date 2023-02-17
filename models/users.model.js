@@ -1,17 +1,18 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcrypt');
 
 var userSchema = new mongoose.Schema({
    firstName: {
       type: String,
       required: [true, 'firstName is required'],
-      minlength: 5,
+      minlength: 3,
       maclength: 50,
    },
    lastName: {
       type: String,
       required: [true, 'lastName is required'],
-      minlength: 5,
+      minlength: 3,
       maclength: 50,
    },
    email: {
@@ -40,7 +41,12 @@ var userSchema = new mongoose.Schema({
    passwordConfirm: {
       type: String,
       required: [true, 'Please confirm your password'],
-      validate: [validator.equals(this.passwordConfirm, this.password), 'Passwords do not match'],
+      validate: {
+         validator: function (value) {
+            return value === this.password;
+         },
+         message: 'Passwords do not match',
+      },
    },
    role: {
       type: String,
@@ -48,8 +54,9 @@ var userSchema = new mongoose.Schema({
          values: ['Administration', 'Resident'],
          message: 'A role can be only Administration or Resident',
       },
+      default: 'Resident',
    },
-   housenumber: {
+   houseNumber: {
       type: String,
       required: [true, 'House number is required field'],
       minlength: 1,
@@ -74,9 +81,9 @@ var userSchema = new mongoose.Schema({
    asswordChangedAt: Date,
 });
 
-userSchema.pre('save', async function () {
+userSchema.pre('save', async function (next) {
    //Only run this function if password was actually modified
-   if (!this.isModified(password)) return next();
+   if (!this.isModified('password')) return next();
 
    this.password = await bcrypt.hash(this.password, 12);
    // Delete passwordConfirm field
